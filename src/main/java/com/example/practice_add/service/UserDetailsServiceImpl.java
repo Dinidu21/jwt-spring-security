@@ -1,4 +1,4 @@
-package com.example.practice_add;
+package com.example.practice_add.service;
 import com.example.practice_add.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;

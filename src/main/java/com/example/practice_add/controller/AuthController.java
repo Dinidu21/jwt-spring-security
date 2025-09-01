@@ -69,9 +69,10 @@ public class AuthController {
             roles.add(userRole);
         } else {
             strRoles.forEach(role -> {
-                switch (role) {
-                    case "admin" -> roles.add(roleRepository.findByName("ROLE_ADMIN"));
-                    default -> roles.add(roleRepository.findByName("ROLE_USER"));
+                if (role.equals("admin")) {
+                    roles.add(roleRepository.findByName("ROLE_ADMIN"));
+                } else {
+                    roles.add(roleRepository.findByName("ROLE_USER"));
                 }
             });
         }

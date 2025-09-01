@@ -1,6 +1,6 @@
 package com.example.practice_add.util;
 
-import com.example.practice_add.UserDetailsServiceImpl;
+import com.example.practice_add.service.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
