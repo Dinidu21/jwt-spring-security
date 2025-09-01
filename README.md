@@ -1,102 +1,189 @@
-# Order Management API Postman Collection
+# Order Management API
 
-This Postman collection is designed to test the Order Management API, a Spring Boot application with JWT-based authentication. The API allows users to manage orders with role-based access control (ROLE_USER and ROLE_ADMIN). The collection includes requests for user authentication (signup and signin) and order operations (create, read, update, delete).
+## Overview
+This is a Spring Boot application that provides a RESTful API for managing orders with JWT-based authentication. The application allows users to sign up, sign in, and perform CRUD operations on orders. It supports role-based access control with two roles: `USER` and `ADMIN`. Users can manage their own orders, while admins have additional privileges to view and manage all orders.
+
+## Features
+- **User Authentication**: Sign up and sign in with JWT token generation.
+- **Role-Based Access Control**: Supports `ROLE_USER` and `ROLE_ADMIN`.
+- **Order Management**:
+  - Create, read, update, and delete orders.
+  - Users can view and manage their own orders.
+  - Admins can view and manage all orders.
+- **Security**: Uses Spring Security with JWT for secure API access.
+
+## Technologies Used
+- **Java**: 17 or higher
+- **Spring Boot**: 3.x
+- **Spring Security**: For authentication and authorization
+- **JWT (JSON Web Tokens)**: For secure user authentication
+- **Spring Data JPA**: For database operations
+- **Maven**: Dependency management
 
 ## Prerequisites
-
-1. **Postman**: Install [Postman](https://www.postman.com/downloads/) to import and run the collection.
-2. **Running API**: Ensure the Order Management API is running locally or on a server. The default base URL is `http://localhost:8080`.
-3. **Database**: The API requires a database (configured in the Spring Boot application) with roles (`ROLE_USER`, `ROLE_ADMIN`) pre-populated.
-4. **JWT Configuration**: Ensure the `jwtSecret` and `jwtExpirationMs` are set in the application properties of the Spring Boot app.
+- Java 17 or higher
+- Maven 3.6 or higher
+- Postman (optional, for testing API endpoints)
+- Git
 
 ## Setup Instructions
 
-1. **Import the Postman Collection**:
-    - Download the `OrderManagementAPI.postman_collection.json` file from the provided artifact.
-    - Open Postman, click **Import**, and select the JSON file to load the collection.
+### 1. Clone the Repository
+```bash
+git clone https://github.com/your-username/order-management-api.git
+cd order-management-api
+```
 
-2. **Set Up Environment Variables**:
-    - In Postman, create a new environment or edit the existing one.
-    - Add the following variables:
-      | Key       | Initial Value              | Description                              |
-      |-----------|----------------------------|------------------------------------------|
-      | `baseUrl` | `http://localhost:8080`    | Base URL of the API                     |
-      | `jwtToken`| (Leave empty)              | Stores JWT token after sign-in          |
-      | `orderId` | `1`                        | ID of the order for update/delete tests |
+### 2. Configure Application Properties
+Edit `src/main/resources/application.properties` to configure the database and JWT settings:
 
-3. **Database Setup**:
-    - Ensure the database has the `ROLE_USER` and `ROLE_ADMIN` roles in the `roles` table.
-    - The application uses Spring Security with BCrypt password encoding and JWT authentication.
+```properties
+# H2 Database configuration
+spring.datasource.url=jdbc:h2:mem:testdb
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+spring.h2.console.enabled=true
 
-## Using the Collection
+# JWT configuration
+app.jwt.secret=your-secure-jwt-secret-key
+app.jwt.expiration-ms=86400000
+```
 
-The collection is organized into two folders: **Auth** and **Orders**.
+Replace `your-secure-jwt-secret-key` with a secure key for JWT signing.
 
-### Auth Folder
-Contains requests for user authentication:
-- **Sign Up (User)**: Registers a new user with `ROLE_USER`.
-    - Endpoint: `POST {{baseUrl}}/api/auth/signup`
-    - Body: `{"username": "testuser", "email": "testuser@example.com", "password": "password123", "role": ["user"]}`
-- **Sign Up (Admin)**: Registers a new user with `ROLE_ADMIN`.
-    - Endpoint: `POST {{baseUrl}}/api/auth/signup`
-    - Body: `{"username": "adminuser", "email": "admin@example.com", "password": "admin123", "role": ["admin"]}`
-- **Sign In**: Authenticates a user and stores the JWT token in the `jwtToken` environment variable.
-    - Endpoint: `POST {{baseUrl}}/api/auth/signin`
-    - Body: `{"username": "testuser", "password": "password123"}`
-    - **Note**: The response includes a JWT token, automatically stored via a Postman test script.
+### 3. Build and Run the Application
+```bash
+mvn clean install
+mvn spring-boot:run
+```
 
-### Orders Folder
-Contains requests for order management (require JWT authentication):
-- **Get All Orders (Admin)**: Retrieves all orders (ROLE_ADMIN only).
-    - Endpoint: `GET {{baseUrl}}/api/orders`
-    - Headers: `Authorization: Bearer {{jwtToken}}`
-- **Get My Orders**: Retrieves orders for the authenticated user (ROLE_USER or ROLE_ADMIN).
-    - Endpoint: `GET {{baseUrl}}/api/orders/my`
-    - Headers: `Authorization: Bearer {{jwtToken}}`
-- **Create Order**: Creates a new order for the authenticated user.
-    - Endpoint: `POST {{baseUrl}}/api/orders`
-    - Headers: `Authorization: Bearer {{jwtToken}}`, `Content-Type: application/json`
-    - Body: `{"productName": "Sample Product", "price": 29.99}`
-- **Update Order**: Updates an existing order (requires ownership or ROLE_ADMIN).
-    - Endpoint: `PUT {{baseUrl}}/api/orders/{{orderId}}`
-    - Headers: `Authorization: Bearer {{jwtToken}}`, `Content-Type: application/json`
-    - Body: `{"productName": "Updated Product", "price": 39.99}`
-- **Delete Order**: Deletes an order (requires ownership or ROLE_ADMIN).
-    - Endpoint: `DELETE {{baseUrl}}/api/orders/{{orderId}}`
-    - Headers: `Authorization: Bearer {{jwtToken}}`
+The application will start on `http://localhost:8080`.
 
-## Testing Workflow
+### 4. Access H2 Console (Optional)
+If enabled, the H2 console is available at `http://localhost:8080/h2-console`. Use the JDBC URL `jdbc:h2:mem:testdb`, username `sa`, and no password.
 
-1. **Sign Up**:
-    - Run the "Sign Up (User)" or "Sign Up (Admin)" request to create a user.
-    - Verify the response: `User registered successfully!`.
+## API Endpoints
 
-2. **Sign In**:
-    - Run the "Sign In" request with the created user’s credentials.
-    - The JWT token is automatically stored in the `jwtToken` variable.
+### Authentication
+- **POST /api/auth/signup**  
+  Register a new user.  
+  **Body**:
+  ```json
+  {
+    "username": "testuser",
+    "email": "testuser@example.com",
+    "password": "password123",
+    "role": ["user"]
+  }
+  ```
+  **Response**: Success message or error if username/email is taken.
 
-3. **Test Order Endpoints**:
-    - Run "Create Order" to create a new order.
-    - Note the order ID from the response and update the `orderId` variable.
-    - Test "Get My Orders" to view the authenticated user’s orders.
-    - Test "Update Order" and "Delete Order" using the `orderId`.
-    - For admin-specific tests, sign in as an admin user and run "Get All Orders".
+- **POST /api/auth/signin**  
+  Authenticate a user and return a JWT token.  
+  **Body**:
+  ```json
+  {
+    "username": "testuser",
+    "password": "password123"
+  }
+  ```
+  **Response**:
+  ```json
+  {
+    "token": "jwt-token-here"
+  }
+  ```
 
-## Notes
-- **Authentication**: All order-related requests require a valid JWT token in the `Authorization` header (`Bearer {{jwtToken}}`).
-- **Error Handling**: If a request fails (e.g., 401 Unauthorized), ensure the `jwtToken` is valid and the user has the required role.
-- **Order ID**: Update the `orderId` variable manually after creating an order to test update/delete requests.
-- **Security**: The API uses Spring Security with JWT and role-based authorization (`ROLE_USER`, `ROLE_ADMIN`).
+### Orders
+All order endpoints require a valid JWT token in the `Authorization` header (`Bearer <token>`).
 
-## Troubleshooting
-- **401 Unauthorized**: Verify the JWT token is valid and not expired. Re-run the "Sign In" request if needed.
-- **403 Forbidden**: Ensure the user has the correct role (`ROLE_ADMIN` for "Get All Orders", ownership or `ROLE_ADMIN` for update/delete).
-- **404 Not Found**: Check if the `orderId` exists in the database for update/delete requests.
-- **Database Issues**: Ensure the database is running and roles are populated.
+- **GET /api/orders**  
+  Retrieve all orders (Admin only).  
+  **Response**: List of all orders.
 
-## Environment Variables
-- Update `baseUrl` if the API is hosted on a different server.
-- The `jwtToken` is set automatically after a successful sign-in.
-- Set `orderId` manually after creating an order to test update/delete endpoints.
+- **GET /api/orders/my**  
+  Retrieve authenticated user's orders.  
+  **Response**: List of user's orders.
 
----
+- **POST /api/orders**  
+  Create a new order for the authenticated user.  
+  **Body**:
+  ```json
+  {
+    "productName": "Sample Product",
+    "price": 29.99
+  }
+  ```
+  **Response**: Created order details.
+
+- **PUT /api/orders/{id}**  
+  Update an existing order (Admin or order owner).  
+  **Body**:
+  ```json
+  {
+    "productName": "Updated Product",
+    "price": 39.99
+  }
+  ```
+  **Response**: Updated order details.
+
+- **DELETE /api/orders/{id}**  
+  Delete an order (Admin or order owner).  
+  **Response**: Empty response with status 200.
+
+## Testing with Postman
+1. Import the provided Postman collection (`OrderManagementAPI.postman_collection.json`) into Postman.
+2. Set the `baseUrl` environment variable to `http://localhost:8080`.
+3. Use the `Sign Up` and `Sign In` requests to register and authenticate users.
+4. The `Sign In` request automatically stores the JWT token in the `jwtToken` environment variable.
+5. Use the stored token for authenticated order requests.
+6. Update the `orderId` environment variable for `Update Order` and `Delete Order` requests.
+
+## Project Structure
+```
+order-management-api/
+├── src/
+│   ├── main/
+│   │   ├── java/com/example/practice_add/
+│   │   │   ├── config/
+│   │   │   │   └── SecurityConfig.java
+│   │   │   ├── controller/
+│   │   │   │   ├── AuthController.java
+│   │   │   │   └── OrderController.java
+│   │   │   ├── dto/
+│   │   │   │   ├── JwtResponse.java
+│   │   │   │   ├── LoginRequest.java
+│   │   │   │   └── SignupRequest.java
+│   │   │   ├── entity/
+│   │   │   │   ├── Order.java
+│   │   │   │   ├── Role.java
+│   │   │   │   └── User.java
+│   │   │   ├── repo/
+│   │   │   │   ├── OrderRepository.java
+│   │   │   │   ├── RoleRepository.java
+│   │   │   │   └── UserRepository.java
+│   │   │   └── util/
+│   │   │       ├── AuthTokenFilter.java
+│   │   │       └── JwtUtils.java
+│   │   └── resources/
+│   │       └── application.properties
+├── pom.xml
+└── README.md
+```
+
+## Security Notes
+- Ensure the JWT secret key is strong and kept confidential.
+- Use HTTPS in production to secure API communications.
+- Regularly update dependencies to address security vulnerabilities.
+
+## Contributing
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature/your-feature`).
+3. Commit your changes (`git commit -m "Add your feature"`).
+4. Push to the branch (`git push origin feature/your-feature`).
+5. Open a pull request.
+
+## License
+This project is licensed under the MIT License.
