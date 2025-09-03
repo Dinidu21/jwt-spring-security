@@ -20,53 +20,9 @@ This is a Spring Boot application that provides a RESTful API for managing order
 - **Spring Data JPA**: For database operations
 - **Maven**: Dependency management
 
-## Prerequisites
-- Java 17 or higher
-- Maven 3.6 or higher
-- Postman (optional, for testing API endpoints)
-- Git
+### API Endpoints
 
-## Setup Instructions
-
-### 1. Clone the Repository
-```bash
-git clone https://github.com/your-username/order-management-api.git
-cd order-management-api
-```
-
-### 2. Configure Application Properties
-Edit `src/main/resources/application.properties` to configure the database and JWT settings:
-
-```properties
-# H2 Database configuration
-spring.datasource.url=jdbc:h2:mem:testdb
-spring.datasource.driverClassName=org.h2.Driver
-spring.datasource.username=sa
-spring.datasource.password=
-spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
-spring.h2.console.enabled=true
-
-# JWT configuration
-app.jwt.secret=your-secure-jwt-secret-key
-app.jwt.expiration-ms=86400000
-```
-
-Replace `your-secure-jwt-secret-key` with a secure key for JWT signing.
-
-### 3. Build and Run the Application
-```bash
-mvn clean install
-mvn spring-boot:run
-```
-
-The application will start on `http://localhost:8080`.
-
-### 4. Access H2 Console (Optional)
-If enabled, the H2 console is available at `http://localhost:8080/h2-console`. Use the JDBC URL `jdbc:h2:mem:testdb`, username `sa`, and no password.
-
-## API Endpoints
-
-### Authentication
+#### Authentication
 - **POST /api/auth/signup**  
   Register a new user.  
   **Body**:
@@ -81,7 +37,7 @@ If enabled, the H2 console is available at `http://localhost:8080/h2-console`. U
   **Response**: Success message or error if username/email is taken.
 
 - **POST /api/auth/signin**  
-  Authenticate a user and return a JWT token.  
+  Authenticate a user and return JWT and refresh tokens.  
   **Body**:
   ```json
   {
@@ -92,54 +48,26 @@ If enabled, the H2 console is available at `http://localhost:8080/h2-console`. U
   **Response**:
   ```json
   {
-    "token": "jwt-token-here"
+    "token": "jwt-token-here",
+    "refreshToken": "refresh-token-here"
   }
   ```
 
-### Orders
-All order endpoints require a valid JWT token in the `Authorization` header (`Bearer <token>`).
-
-- **GET /api/orders**  
-  Retrieve all orders (Admin only).  
-  **Response**: List of all orders.
-
-- **GET /api/orders/my**  
-  Retrieve authenticated user's orders.  
-  **Response**: List of user's orders.
-
-- **POST /api/orders**  
-  Create a new order for the authenticated user.  
+- **POST /api/auth/refresh-token**  
+  Obtain a new access token using a refresh token.  
   **Body**:
   ```json
   {
-    "productName": "Sample Product",
-    "price": 29.99
+    "refreshToken": "refresh-token-here"
   }
   ```
-  **Response**: Created order details.
-
-- **PUT /api/orders/{id}**  
-  Update an existing order (Admin or order owner).  
-  **Body**:
+  **Response**:
   ```json
   {
-    "productName": "Updated Product",
-    "price": 39.99
+    "token": "new-jwt-token-here",
+    "refreshToken": "new-refresh-token-here"
   }
   ```
-  **Response**: Updated order details.
-
-- **DELETE /api/orders/{id}**  
-  Delete an order (Admin or order owner).  
-  **Response**: Empty response with status 200.
-
-## Testing with Postman
-1. Import the provided Postman collection (`OrderManagementAPI.postman_collection.json`) into Postman.
-2. Set the `baseUrl` environment variable to `http://localhost:8080`.
-3. Use the `Sign Up` and `Sign In` requests to register and authenticate users.
-4. The `Sign In` request automatically stores the JWT token in the `jwtToken` environment variable.
-5. Use the stored token for authenticated order requests.
-6. Update the `orderId` environment variable for `Update Order` and `Delete Order` requests.
 
 ## Project Structure
 ```
